@@ -2,7 +2,10 @@ package com.oldSpringBatch.config;
 
 import com.oldSpringBatch.listener.FirstJobListener;
 import com.oldSpringBatch.listener.FirstStepListener;
+import com.oldSpringBatch.processor.FirstItemProcessor;
+import com.oldSpringBatch.reader.FirstItemReader;
 import com.oldSpringBatch.service.ThirdTasklet;
+import com.oldSpringBatch.writer.FirstItemWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -35,46 +38,40 @@ public class SampleJob {
     @Autowired
     private FirstStepListener firstStepListener;
 
+    @Autowired
+    private FirstItemReader firstItemReader;
+
+    @Autowired
+    private FirstItemProcessor firstItemProcessor;
+
+    @Autowired
+    private FirstItemWriter firstItemWriter;
+
     @Bean
-    public Job firstJob() {
-        return jobBuilderFactory.get("secondJob")
-                .incrementer(new RunIdIncrementer())
-                .start(firstStep())
-                .next(secondStep())
-                .listener(firstJobListener)
+    public Job chunkJob() {
+        return jobBuilderFactory.get("chunkJob")
+                .start(chunkStep())
+                .next(taskletStep())
                 .build();
     }
 
-    private Step firstStep() {
-        return stepBuilderFactory.get("firstStep")
-                .tasklet(firstTasklet())
-                .listener(firstStepListener)
+    private Step chunkStep() {
+        return stepBuilderFactory.get("chunkStep")
+                .<Integer, Integer>chunk(3)
+                .reader(firstItemReader)
+                .processor(firstItemProcessor)
+                .writer(firstItemWriter)
                 .build();
     }
 
-    private Tasklet firstTasklet() {
-        return new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                log.info("I can see my baby swinging");
-                return RepeatStatus.FINISHED;
-            }
-        };
-    }
-
-    private Step secondStep() {
-        return stepBuilderFactory.get("secondStep")
-                .tasklet(secondTasklet())
-                .build();
-    }
-
-    private Tasklet secondTasklet() {
-        return new Tasklet() {
-            @Override
-            public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
-                log.info("His parliament is on fire and his hands are up");
-                return RepeatStatus.FINISHED;
-            }
-        };
+    private Step taskletStep() {
+        return stepBuilderFactory.get("taskletStep")
+                .tasklet(new Tasklet() {
+                    @Override
+                    public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext) throws Exception {
+                        log.info("ALL DONE HERE IN THE SAMPLE JOB");
+                        return RepeatStatus.FINISHED;
+                    };
+                }).build();
     }
 }
