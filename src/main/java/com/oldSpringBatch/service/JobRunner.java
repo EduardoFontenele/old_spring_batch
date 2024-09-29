@@ -9,9 +9,10 @@ import org.springframework.batch.core.repository.JobExecutionAlreadyRunningExcep
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
+import java.util.Map;
 
 @Component
 public class JobRunner {
@@ -20,13 +21,29 @@ public class JobRunner {
     private JobLauncher jobLauncher;
 
     @Autowired
-    private Job job;
+    private Map<String, Job> jobs;
 
-    public void runJob() throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+    public JobRunner(Map<String, Job> jobs) {
+        this.jobs = jobs;
+    }
+
+    @Async
+    public void runJob(String jobName) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
 
-        jobLauncher.run(job, jobParameters);
+        try {
+            switch (jobName) {
+                case "Monique":
+                    jobLauncher.run(jobs.get("chunkJob"), jobParameters);
+                    break;
+                case "Eduardo":
+                    jobLauncher.run(jobs.get("taskletJob"), jobParameters);
+                    break;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+        }
     }
 }

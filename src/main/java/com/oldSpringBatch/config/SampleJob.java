@@ -20,6 +20,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 @Configuration
 @Slf4j
 public class SampleJob {
@@ -48,6 +53,17 @@ public class SampleJob {
     private FirstItemWriter firstItemWriter;
 
     @Bean
+    public Map<String, Job> jobs() {
+        return Map.of("chunkJob", chunkJob(),
+                "taskletJob", taskletJob());
+    }
+
+    private Job taskletJob() {
+        return jobBuilderFactory.get("taskletJob")
+                .start(taskletStep())
+                .build();
+    }
+
     public Job chunkJob() {
         return jobBuilderFactory.get("chunkJob")
                 .start(chunkStep())
