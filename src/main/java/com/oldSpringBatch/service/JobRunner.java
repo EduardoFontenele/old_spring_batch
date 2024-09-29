@@ -28,11 +28,10 @@ public class JobRunner {
     }
 
     @Async
-    public void runJob(String jobName) throws JobInstanceAlreadyCompleteException, JobExecutionAlreadyRunningException, JobParametersInvalidException, JobRestartException {
+    public void runJob(String jobName) {
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .toJobParameters();
-
         try {
             switch (jobName) {
                 case "Monique":

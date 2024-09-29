@@ -16,8 +16,7 @@ public class FirstItemReader implements ItemReader<Integer> {
 
     @Override
     public Integer read() throws Exception, UnexpectedInputException, ParseException, NonTransientResourceException {
-        System.out.println("Inside item reader");
-        Integer item;
+        Integer item;;
 
         if (i < list.size()) {
             item = list.get(i);

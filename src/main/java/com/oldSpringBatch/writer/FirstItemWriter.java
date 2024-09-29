@@ -9,8 +9,7 @@ import java.util.List;
 public class FirstItemWriter implements ItemWriter<Integer> {
     @Override
     public void write(List<? extends Integer> list) throws Exception {
-        System.out.println("Inside item writer");
-
-        list.forEach(System.out::println);
+        System.out.println("Iniciando escrita dos arquivos...");
+        list.forEach(i -> System.out.println("Monique and Eduardo - " + i));
     }
 }
